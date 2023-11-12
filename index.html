@@ -1,49 +1,57 @@
 <!DOCTYPE html>
-<html><head>  <meta charset="UTF-8">
+<html>
+
+<head>  
+	<meta charset="UTF-8">
     <title>Select A Major</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 </head>
+
 <body style='margin-left: 30px;'>
 
     <h1>Select A Major</h1>
         
-    <input type="button" id='btn' value="CIT Majors">
-	<input type="button" id='btn' value="Business Majors">
+    <button type="button" class="btn btn-primary" id='btn' onClick="getData('CIT')">CIT Majors</button>
+	<button type="button" class="btn btn-primary" id='btn' onClick="getData('BUS')">Business Majors</button>
              
  	<div id="result"></div>
-    
-<script>
-   
-    document.addEventListener('DOMContentLoaded', function() {
-													  
-    	document.querySelector('#btn').onclick = async function(){   
-			var response = await fetch('cit5students.json');
-			if(response.ok) {
-				var data = await response.json();               
-
-				var tableContents = "<table cellspacing='5'>"
-				tableContents += "<tr><td>Name</td><td>Major</td><td>Midterm</td><td>Final</td></tr>";
-					
-            	for(i = 0; i < data.length; i++) {
-					if(data[i].major = "CIT"){
-						tableContents += `<tr><td> ${data[i].name} </td>
-							<td> ${data[i].major} </td>
-							<td> ${data[i].midterm} </td>
-							<td> ${data[i].final} </td></tr>`;
-						}
-                }
-					
-                tableContents += "</table>";
-
-                document.querySelector('#result').innerHTML = tableContents;
-			}
-			else {
-				document.querySelector('#result').innerHTML = "Data not found";
-			}	
-    	};
-	
-  	});
-   
+       
+<script type="text/x-handlebars-template" id="tableTemplate">
+	<table class="table table-striped">
+		<tr><th></th>Name<th>Major</th><th>Midterm</th><th>Final</th></tr>
+			{{#each rows}}
+				<tr>
+					<td>{{name}}</td><td>{{major}}</td><td>{{midterm}}</td><td>{{final}}</td>
+				</tr>
+			{{/each}}
+	</table>
 </script>
-   
+
+<script>
+async function getData(selected_major){
+	var response = await fetch('cit5students.json');
+
+	if(response.ok) {
+		var data = await response.json();
+		
+		major_items = data.filter( (item) => item.major == selected_major );
+
+		var templateText = document.getElementById('tableTemplate').innerHTML;
+		var compiledTemplateText = Handlebars.compile(templateText);
+		
+		compiledHtml = compiledTemplateText({ rows: major_items })
+		
+		document.getElementById('menuTable').innerHTML = compiledHtml;
+	} else {
+		document.querySelector('#menuTable').innerHTML = "There was an error, or menu items not found";
+	}
+ }
+</script>
+
+<div id="menuTable"></div>
+
 </body>
 </html>
